@@ -2,12 +2,25 @@
   "expo": {
     "name": "hallel",
     "slug": "hallel",
+    "scheme": "myapp",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/images/logo-hallel.png",
+    "userInterfaceStyle": "automatic",
+    "splash": {
+      "image": "./assets/images/splash-screen.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#06612E"
+    },
+    "extra": {
+      "API_URL": "http://localhost:8080/api"
+    },
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.example.with-new-arch"
     },
     "android": {
-      "package": "com.example.withnewarch"
+      "package": "br.com.mobile.hallel"
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -23,7 +36,11 @@
             "newArchEnabled": true
           }
         }
-      ]
-    ]
+      ],
+      "expo-router"
+    ],
+    "experiments": {
+      "typedRoutes": true
+    }
   }
 }
