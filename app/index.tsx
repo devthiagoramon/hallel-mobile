@@ -7,7 +7,6 @@ import { getTokenUser } from 'service/storage/user/storage-user';
 import { isTokenValidService } from 'service/user/user-service';
 import { MainPageBottomContainer, MainPageBottomContainerButtons, MainPageBottomContainerTitle, MainPageContainer, MainPageImage, MainPageImageContainer } from './main-style';
 
-
 const MainPage = () => {
 
     useEffect(() => {
@@ -17,7 +16,7 @@ const MainPage = () => {
                 if (token) {
                     const validateToken = await isTokenValidService(token);
                     if (validateToken) {
-                        router.navigate("home")
+                        router.navigate("/")
                     }
                 }
             } catch (error) {
@@ -42,7 +41,7 @@ const MainPage = () => {
                         <ButtonH color='primaryLight' variant='contained'>
                             Cadastrar
                         </ButtonH>
-                        <ButtonH onPress={() => router.navigate("login")} variant='contained' color='primary'>
+                        <ButtonH onPress={() => router.navigate("/login")} variant='contained' color='primary'>
                             Entrar
                         </ButtonH>
                     </MainPageBottomContainerButtons>

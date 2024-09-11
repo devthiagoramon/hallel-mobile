@@ -12,9 +12,6 @@
       "resizeMode": "contain",
       "backgroundColor": "#06612E"
     },
-    "extra": {
-      "API_URL": "http://localhost:8080/api"
-    },
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.example.with-new-arch"

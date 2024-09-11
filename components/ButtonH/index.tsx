@@ -4,7 +4,7 @@ import { ButtonHComponent, ButtonHTextComponent } from "./style";
 
 interface ButtonHProps extends PressableProps {
     variant: "contained" | "outlined";
-    color: "primary" | "primaryLight" | "secondary";
+    color: "primary" | "primaryLight" | "secondary" | "success" | "error";
     children: "string" | ReactNode;
 }
 

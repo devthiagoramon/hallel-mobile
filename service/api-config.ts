@@ -1,6 +1,6 @@
-import axios from "axios"
-import Constants from "expo-constants"
+import { API_URL } from "@env";
+import axios from "axios";
 
 export const api = axios.create({
-    baseURL: Constants.manifest2.API_URL,
-})
+  baseURL: API_URL,
+});

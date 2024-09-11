@@ -7,7 +7,14 @@
       "@/*": ["src/*"],
       "@components": ["./src/components/*"],
       "@assets": ["./src/assets/*"]
-    }
+    },
+    "types": []
   },
-  "include": ["**/*.ts", "**/*.tsx", ".expo/types/**/*.ts", "expo-env.d.ts"]
+  "include": [
+    "env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".expo/types/**/*.ts",
+    "expo-env.d.ts"
+  ]
 }
