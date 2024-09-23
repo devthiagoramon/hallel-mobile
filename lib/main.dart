@@ -1,20 +1,29 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:hallel/screens/login.dart';
+import 'package:hallel/screens/signin.dart';
 
 void main() {
   runApp(const MainApp());
 }
+
+final _router = GoRouter(routes: [
+  GoRoute(path: "/", builder: (context, state) => const MainContainer()),
+  GoRoute(path: "/login", builder: (context, state) => const LoginScreen()),
+  GoRoute(path: "/signin", builder: (context, state) => const SignInScreen())
+]);
 
 class MainApp extends StatelessWidget {
   const MainApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return MaterialApp.router(
       title: 'Hallel',
+      routerConfig: _router,
       theme: ThemeData(
           useMaterial3: true,
           colorScheme: ColorScheme.fromSeed(seedColor: Colors.green)),
-      home: MainContainer(),
     );
   }
 }
@@ -102,30 +111,29 @@ class ButtonsCardMainPage extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        SizedBox(
-          width: 500,
-          height: 46,
-          child: ElevatedButton(
-            onPressed: () {},
-            child: Text(
-              "CADASTRO",
-              style: buttonText,
-            ),
+        ElevatedButton(
+          onPressed: () {
+            context.go("/signin");
+          },
+          style: FilledButton.styleFrom(minimumSize: Size(500, 46)),
+          child: Text(
+            "CADASTRO",
+            style: buttonText,
           ),
         ),
         SizedBox(
           height: 16,
         ),
-        SizedBox(
-            width: 500,
-            height: 46,
-            child: FilledButton(
-                onPressed: () {},
-                style: FilledButton.styleFrom(backgroundColor: Colors.blue),
-                child: Text(
-                  "ENTRAR",
-                  style: buttonText.copyWith(color: Colors.white),
-                ))),
+        FilledButton(
+            onPressed: () {
+              context.go("/login");
+            },
+            style: FilledButton.styleFrom(
+                backgroundColor: Colors.blue, minimumSize: Size(500, 46)),
+            child: Text(
+              "ENTRAR",
+              style: buttonText.copyWith(color: Colors.white),
+            )),
         SizedBox(
           height: 8,
         ),
