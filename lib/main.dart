@@ -1,29 +1,69 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:hallel/screens/home/home.dart';
 import 'package:hallel/screens/login.dart';
 import 'package:hallel/screens/signin.dart';
+import 'package:hallel/services/dio_client.dart';
+import 'package:hallel/services/user_service/user_api_routes.dart';
+import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+var initialRoute = "/";
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
+  Future<void> validateTokenUser() async {
+    final prefs = await SharedPreferences.getInstance();
+    final tokenApi = prefs.getString("tokenApi");
+
+    if (tokenApi != null && tokenApi.isNotEmpty) {
+      DioClient().setTokenApi(tokenApi);
+      final tokenValid =
+          await UserRoutesApi().validateTokenUserService(tokenApi);
+
+      if (tokenValid) {
+        initialRoute = "/home";
+      } else {
+        initialRoute = "/login";
+      }
+    }
+  }
+
+  validateTokenUser();
   runApp(const MainApp());
 }
 
-final _router = GoRouter(routes: [
+final _router = GoRouter(initialLocation: initialRoute, routes: [
   GoRoute(path: "/", builder: (context, state) => const MainContainer()),
   GoRoute(path: "/login", builder: (context, state) => const LoginScreen()),
-  GoRoute(path: "/signin", builder: (context, state) => const SignInScreen())
+  GoRoute(path: "/signin", builder: (context, state) => const SignInScreen()),
+  GoRoute(path: "/home", builder: (context, state) => const HomeContainer()),
 ]);
 
-class MainApp extends StatelessWidget {
+class MainApp extends StatefulWidget {
   const MainApp({super.key});
 
   @override
+  State<MainApp> createState() => _MainAppState();
+}
+
+class _MainAppState extends State<MainApp> {
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return MaterialApp.router(
-      title: 'Hallel',
-      routerConfig: _router,
-      theme: ThemeData(
-          useMaterial3: true,
-          colorScheme: ColorScheme.fromSeed(seedColor: Colors.green)),
+    return ChangeNotifierProvider(
+      create: (context) => MainAppState(),
+      child: MaterialApp.router(
+        title: 'Hallel',
+        routerConfig: _router,
+        theme: ThemeData(
+            useMaterial3: true,
+            colorScheme: ColorScheme.fromSeed(seedColor: Colors.green)),
+      ),
     );
   }
 }

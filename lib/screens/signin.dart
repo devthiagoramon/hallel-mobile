@@ -2,6 +2,7 @@ import 'dart:developer';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:hallel/components/login_signin/forms_container.dart';
 import 'package:hallel/components/login_signin/logo_container.dart';
 import 'package:hallel/services/dio_client.dart';
@@ -75,7 +76,7 @@ class _ContainerSignInState extends State<ContainerSignIn> {
         ));
         return;
       }
-      Navigator.popAndPushNamed(context, "/login");
+      context.go("/login");
     } catch (e) {
       log(e.toString(), name: "SignInScreen");
     }
@@ -85,79 +86,93 @@ class _ContainerSignInState extends State<ContainerSignIn> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return SingleChildScrollView(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          LogoContainer(),
-          SizedBox(
-            height: 54,
+    return Stack(
+      children: [
+        SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              LogoContainer(),
+              SizedBox(
+                height: 54,
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                child: Text(
+                  "CADASTRO",
+                  style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 36,
+                      color: theme.colorScheme.onPrimary),
+                ),
+              ),
+              FormContainer(
+                  formKey: _formKey,
+                  onButtonPressed: sendRequest,
+                  textButton: "CADASTRAR",
+                  campos: [
+                    FormContainerFields(
+                        label: "Nome",
+                        hint: "Digite o seu nome",
+                        initialValue: formValues['Nome']!,
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Por favor, insira o seu nome';
+                          }
+                          return null;
+                        },
+                        onChanged: (value) => updateFormsValue('Nome', value)),
+                    FormContainerFields(
+                        label: "E-mail",
+                        hint: "Digite o seu e-mail",
+                        initialValue: formValues['Email']!,
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Por favor, insira o e-mail';
+                          }
+                          return null;
+                        },
+                        onChanged: (value) => updateFormsValue('Email', value)),
+                    FormContainerFields(
+                        label: "Senha",
+                        hint: "Digite a sua senha",
+                        initialValue: formValues['Senha']!,
+                        isPassword: true,
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Por favor, insira a sua senha';
+                          }
+                          return null;
+                        },
+                        onChanged: (value) => updateFormsValue('Senha', value)),
+                    FormContainerFields(
+                        label: "Confirmar senha",
+                        hint: "Confirme a sua senha",
+                        initialValue: formValues['ConfirmSenha']!,
+                        isPassword: true,
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Por favor, confirme a sua senha';
+                          }
+                          return null;
+                        },
+                        onChanged: (value) =>
+                            updateFormsValue('ConfirmSenha', value))
+                  ])
+            ],
           ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0),
-            child: Text(
-              "CADASTRO",
-              style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 36,
-                  color: theme.colorScheme.onPrimary),
-            ),
-          ),
-          FormContainer(
-              formKey: _formKey,
-              onButtonPressed: sendRequest,
-              textButton: "CADASTRAR",
-              campos: [
-                FormContainerFields(
-                    label: "Nome",
-                    hint: "Digite o seu nome",
-                    initialValue: formValues['Nome']!,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Por favor, insira o seu nome';
-                      }
-                      return null;
-                    },
-                    onChanged: (value) => updateFormsValue('Nome', value)),
-                FormContainerFields(
-                    label: "E-mail",
-                    hint: "Digite o seu e-mail",
-                    initialValue: formValues['Email']!,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Por favor, insira o e-mail';
-                      }
-                      return null;
-                    },
-                    onChanged: (value) => updateFormsValue('Email', value)),
-                FormContainerFields(
-                    label: "Senha",
-                    hint: "Digite a sua senha",
-                    initialValue: formValues['Senha']!,
-                    isPassword: true,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Por favor, insira a sua senha';
-                      }
-                      return null;
-                    },
-                    onChanged: (value) => updateFormsValue('Senha', value)),
-                FormContainerFields(
-                    label: "Confirmar senha",
-                    hint: "Confirme a sua senha",
-                    initialValue: formValues['ConfirmSenha']!,
-                    isPassword: true,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Por favor, confirme a sua senha';
-                      }
-                      return null;
-                    },
-                    onChanged: (value) =>
-                        updateFormsValue('ConfirmSenha', value))
-              ])
-        ],
-      ),
+        ),
+        Positioned(
+            top: 40,
+            left: 10,
+            child: IconButton(
+                onPressed: () {
+                  GoRouter.of(context).go("/");
+                },
+                iconSize: 38,
+                color: Colors.white,
+                icon: Icon(Icons.chevron_left)))
+      ],
     );
   }
 }
