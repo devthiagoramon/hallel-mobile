@@ -1,7 +1,13 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:hallel/screens/configs/drawer_home_config.dart';
+import 'package:hallel/screens/configs/tabs_config_home.dart';
 import 'package:hallel/screens/home/home.dart';
+import 'package:hallel/screens/home/quem-somos.dart';
 import 'package:hallel/screens/login.dart';
+import 'package:hallel/screens/profile/profile.dart';
 import 'package:hallel/screens/signin.dart';
 import 'package:hallel/services/dio_client.dart';
 import 'package:hallel/services/user_service/user_api_routes.dart';
@@ -11,25 +17,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 var initialRoute = "/";
 
 void main() {
-  WidgetsFlutterBinding.ensureInitialized();
-  Future<void> validateTokenUser() async {
-    final prefs = await SharedPreferences.getInstance();
-    final tokenApi = prefs.getString("tokenApi");
-
-    if (tokenApi != null && tokenApi.isNotEmpty) {
-      DioClient().setTokenApi(tokenApi);
-      final tokenValid =
-          await UserRoutesApi().validateTokenUserService(tokenApi);
-
-      if (tokenValid) {
-        initialRoute = "/home";
-      } else {
-        initialRoute = "/login";
-      }
-    }
-  }
-
-  validateTokenUser();
   runApp(const MainApp());
 }
 
@@ -37,21 +24,35 @@ final _router = GoRouter(initialLocation: initialRoute, routes: [
   GoRoute(path: "/", builder: (context, state) => const MainContainer()),
   GoRoute(path: "/login", builder: (context, state) => const LoginScreen()),
   GoRoute(path: "/signin", builder: (context, state) => const SignInScreen()),
-  GoRoute(path: "/home", builder: (context, state) => const HomeContainer()),
+  ShellRoute(
+    builder: (context, state, child) {
+      return TabsLayout(child: child);
+    },
+    routes: [
+      ShellRoute(
+          builder: (context, state, child) {
+            return HomeLayout(child: child);
+          },
+          routes: [
+            GoRoute(
+                path: "/home",
+                name: "home",
+                builder: (context, state) => const HomeContainer()),
+            GoRoute(
+              path: "/home/quem-somos",
+              builder: (context, state) => const QuemSomosScreen(),
+            ),
+          ]),
+      GoRoute(
+        path: "/profile",
+        builder: (context, state) => const ProfileScreen(),
+      )
+    ],
+  )
 ]);
 
-class MainApp extends StatefulWidget {
+class MainApp extends StatelessWidget {
   const MainApp({super.key});
-
-  @override
-  State<MainApp> createState() => _MainAppState();
-}
-
-class _MainAppState extends State<MainApp> {
-  @override
-  void initState() {
-    super.initState();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -62,16 +63,49 @@ class _MainAppState extends State<MainApp> {
         routerConfig: _router,
         theme: ThemeData(
             useMaterial3: true,
+            scaffoldBackgroundColor: Colors.white,
             colorScheme: ColorScheme.fromSeed(seedColor: Colors.green)),
       ),
     );
   }
 }
 
-class MainContainer extends StatelessWidget {
+class MainContainer extends StatefulWidget {
   const MainContainer({
     super.key,
   });
+
+  @override
+  State<MainContainer> createState() => _MainContainerState();
+}
+
+class _MainContainerState extends State<MainContainer> {
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    Future<void> validateTokenUser() async {
+      final prefs = await SharedPreferences.getInstance();
+      final tokenApi = prefs.getString("tokenApi");
+      if (tokenApi != null && tokenApi.isNotEmpty) {
+        DioClient().setTokenApi(tokenApi);
+        try {
+          final tokenValid =
+              await UserRoutesApi().validateTokenUserService(tokenApi);
+          if (!mounted) return;
+          if (tokenValid) {
+            context.go("/home");
+          } else {
+            context.go("/login");
+          }
+        } catch (e) {
+          log(e.toString(), name: "MainPage");
+        }
+      }
+    }
+
+    validateTokenUser();
+  }
 
   @override
   Widget build(BuildContext context) {
