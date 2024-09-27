@@ -19,7 +19,7 @@ class DrawerRoutesModel {
 }
 
 class _HomeLayoutState extends State<HomeLayout> {
-  int selected_index = 0;
+  int selectedIndex = 0;
 
   List<DrawerRoutesModel> _homepageRoutes = [
     DrawerRoutesModel(title: "Inicio", icon: Icons.home, route: "/home"),
@@ -34,14 +34,31 @@ class _HomeLayoutState extends State<HomeLayout> {
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        title: Text(_homepageRoutes[selected_index].title),
+        toolbarHeight: 72,
+        shape: BorderDirectional(
+            bottom: BorderSide(color: Colors.black, width: 1)),
         leading: Builder(builder: (context) {
-          return IconButton(
-              onPressed: () {
-                Scaffold.of(context).openDrawer();
-              },
-              icon: Icon(Icons.menu));
+          return Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: IconButton(
+                onPressed: () {
+                  Scaffold.of(context).openDrawer();
+                },
+                iconSize: 32,
+                icon: Icon(Icons.menu)),
+          );
         }),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: IconButton(
+                onPressed: () {
+                  context.go("/profile");
+                },
+                iconSize: 32,
+                icon: Icon(Icons.person)),
+          )
+        ],
       ),
       body: widget.child,
       drawer: Drawer(
@@ -53,7 +70,7 @@ class _HomeLayoutState extends State<HomeLayout> {
               leading: Icon(_homepageRoutes[index].icon),
               onTap: () {
                 context.go(_homepageRoutes[index].route);
-                selected_index = index;
+                selectedIndex = index;
                 Navigator.pop(context);
               },
             );

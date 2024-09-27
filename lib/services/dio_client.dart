@@ -10,7 +10,7 @@ class DioClient {
     _dio.options.receiveTimeout = Duration(seconds: 3);
   }
 
-  Future<Response> get(String endpoint) async {
+  Future<Response<T>> get<T>(String endpoint) async {
     return await _dio.get(endpoint);
   }
 
