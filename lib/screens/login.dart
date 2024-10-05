@@ -2,10 +2,12 @@ import 'dart:developer';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hallel/components/login_signin/forms_container.dart';
 import 'package:hallel/components/login_signin/logo_container.dart';
 import 'package:hallel/services/dio_client.dart';
+import 'package:hallel/store/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginScreen extends StatelessWidget {
@@ -21,16 +23,16 @@ class LoginScreen extends StatelessWidget {
   }
 }
 
-class ContainerLogin extends StatefulWidget {
+class ContainerLogin extends ConsumerStatefulWidget {
   const ContainerLogin({
     super.key,
   });
 
   @override
-  State<ContainerLogin> createState() => _ContainerLoginState();
+  ConsumerState<ContainerLogin> createState() => _ContainerLoginState();
 }
 
-class _ContainerLoginState extends State<ContainerLogin> {
+class _ContainerLoginState extends ConsumerState<ContainerLogin> {
   final _formKey = GlobalKey<FormState>();
 
   // Estados para armazenar os valores dos campos
@@ -57,6 +59,7 @@ class _ContainerLoginState extends State<ContainerLogin> {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString("tokenApi", token);
       if (!mounted) return;
+      ref.read(userProvider.notifier).loginAction(response.data["objeto"]);
       context.go("/home");
     } catch (e) {
       log(e.toString(), name: "LoginScreen");

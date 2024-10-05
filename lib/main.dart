@@ -1,8 +1,10 @@
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hallel/screens/configs/drawer_home_config.dart';
+import 'package:hallel/screens/configs/drawer_profile_config.dart';
 import 'package:hallel/screens/configs/tabs_config_home.dart';
 import 'package:hallel/screens/home/home.dart';
 import 'package:hallel/screens/home/quem-somos.dart';
@@ -11,13 +13,13 @@ import 'package:hallel/screens/profile/profile.dart';
 import 'package:hallel/screens/signin.dart';
 import 'package:hallel/services/dio_client.dart';
 import 'package:hallel/services/user_service/user_api_routes.dart';
-import 'package:provider/provider.dart';
+import 'package:hallel/store/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 var initialRoute = "/";
 
 void main() {
-  runApp(const MainApp());
+  runApp(ProviderScope(child: const MainApp()));
 }
 
 final _router = GoRouter(initialLocation: initialRoute, routes: [
@@ -43,11 +45,17 @@ final _router = GoRouter(initialLocation: initialRoute, routes: [
                 builder: (context, state) => const QuemSomosScreen(),
                 name: "home-quem-somos"),
           ]),
-      GoRoute(
-        path: "/profile",
-        name: "profile",
-        builder: (context, state) => const ProfileScreen(),
-      )
+      ShellRoute(
+          builder: (context, state, child) {
+            return ProfileLayout(child: child);
+          },
+          routes: [
+            GoRoute(
+              path: "/profile",
+              name: "profile",
+              builder: (context, state) => const ProfileScreen(),
+            )
+          ])
     ],
   )
 ]);
@@ -57,30 +65,27 @@ class MainApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (context) => MainAppState(),
-      child: MaterialApp.router(
-        title: 'Hallel',
-        routerConfig: _router,
-        theme: ThemeData(
-            useMaterial3: true,
-            scaffoldBackgroundColor: Colors.white,
-            colorScheme: ColorScheme.fromSeed(seedColor: Colors.green)),
-      ),
+    return MaterialApp.router(
+      title: 'Hallel',
+      routerConfig: _router,
+      theme: ThemeData(
+          useMaterial3: true,
+          scaffoldBackgroundColor: Colors.white,
+          colorScheme: ColorScheme.fromSeed(seedColor: Colors.green)),
     );
   }
 }
 
-class MainContainer extends StatefulWidget {
+class MainContainer extends ConsumerStatefulWidget {
   const MainContainer({
     super.key,
   });
 
   @override
-  State<MainContainer> createState() => _MainContainerState();
+  ConsumerState<MainContainer> createState() => _MainContainerState();
 }
 
-class _MainContainerState extends State<MainContainer> {
+class _MainContainerState extends ConsumerState<MainContainer> {
   @override
   void initState() {
     // TODO: implement initState
@@ -93,11 +98,13 @@ class _MainContainerState extends State<MainContainer> {
         try {
           final tokenValid =
               await UserRoutesApi().validateTokenUserService(tokenApi);
-          if (!mounted) return;
           if (tokenValid) {
-            context.go("/home");
+            final profileInfos =
+                await UserRoutesApi().profileInfosByTokenService(tokenApi);
+            ref.read(userProvider.notifier).loginAction(profileInfos);
+            mounted ? context.go("/home") : false;
           } else {
-            context.go("/login");
+            mounted ? context.go("/login") : false;
           }
         } catch (e) {
           log(e.toString(), name: "MainPage");
@@ -242,5 +249,3 @@ class ImageContainerMainPage extends StatelessWidget {
     );
   }
 }
-
-class MainAppState extends ChangeNotifier {}
