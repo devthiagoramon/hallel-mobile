@@ -7,7 +7,7 @@ class EventosListHomePageDTO {
   EventosListHomePageDTO(this.id, this.titulo, this.date, this.image);
 
   factory EventosListHomePageDTO.fromJson(Map<String, dynamic> json) {
-    return EventosListHomePageDTO(
-        json['id'], json['titulo'], json['date'], json['image']);
+    return EventosListHomePageDTO(json['id'] ?? "", json['titulo'] ?? "",
+        json['date'] ?? "", json['imagem'] ?? "");
   }
 }

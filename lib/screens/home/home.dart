@@ -5,8 +5,10 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
+import 'package:hallel/components/general/shimmer_container.dart';
 import 'package:hallel/model/eventos_model.dart';
 import 'package:hallel/services/dio_client.dart';
+import 'package:intl/intl.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({
@@ -174,17 +176,23 @@ class EventosCardHomePage extends StatefulWidget {
 class _EventosCardHomePageState extends State<EventosCardHomePage> {
   final PageController _pageController = PageController(initialPage: 0);
   List<EventosListHomePageDTO> _eventos = [];
+  bool isLoading = true;
 
   Future<void> getEventosFromAPI() async {
     try {
       Response<List<dynamic>> response =
           await DioClient().get("/public/home/eventos/listar");
-      log(_eventos.toString());
-      _eventos = response.data!
-          .map((item) => EventosListHomePageDTO.fromJson(item))
-          .toList();
+      if (mounted) {
+        setState(() {
+          _eventos = response.data!
+              .map((item) => EventosListHomePageDTO.fromJson(item))
+              .toList();
+          isLoading = false;
+        });
+      }
     } catch (e) {
       log(e.toString(), name: "HomeScreen");
+      isLoading = false;
     }
   }
 
@@ -192,7 +200,9 @@ class _EventosCardHomePageState extends State<EventosCardHomePage> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    getEventosFromAPI();
+    if (mounted) {
+      getEventosFromAPI();
+    }
   }
 
   @override
@@ -201,58 +211,80 @@ class _EventosCardHomePageState extends State<EventosCardHomePage> {
     final dateStyle = TextStyle(fontSize: 16, fontWeight: FontWeight.w400);
 
     return SizedBox(
-      height: 300,
-      child: PageView.builder(
-          controller: _pageController,
-          itemCount: _eventos.length,
-          itemBuilder: (context, index) {
-            return Card(
-              child: Column(
-                children: [
-                  Image.memory(
-                    base64Decode(_eventos[index].image),
-                    height: 230,
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Row(
-                      children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisAlignment: MainAxisAlignment.start,
+      height: 375,
+      child: isLoading
+          ? LoadingComponent(
+              child: SizedBox(
+              height: 375,
+              width: MediaQuery.of(context).size.width,
+            ))
+          : PageView.builder(
+              controller: _pageController,
+              itemCount: _eventos.length,
+              itemBuilder: (context, index) {
+                return Card(
+                  child: Column(
+                    children: [
+                      _eventos[index].image != ""
+                          ? ClipRRect(
+                              borderRadius: BorderRadius.only(
+                                  topLeft: Radius.circular(8),
+                                  topRight: Radius.circular(8)),
+                              child: Image.memory(
+                                base64Decode(
+                                    _eventos[index].image.split(',').last),
+                                fit: BoxFit.cover,
+                                height: 230,
+                              ),
+                            )
+                          : SizedBox(
+                              height: 230,
+                            ),
+                      Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Row(
                           children: [
-                            Text(
-                              _eventos[index].titulo,
-                              style: nameStyle,
+                            Container(
+                              width: 200,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                children: [
+                                  Text(_eventos[index].titulo,
+                                      style: nameStyle,
+                                      softWrap: true,
+                                      maxLines: 2,
+                                      textWidthBasis: TextWidthBasis.parent,
+                                      overflow: TextOverflow.ellipsis),
+                                  GapHomePage(height: 16),
+                                  Text(
+                                    "Data: ${DateFormat('dd/MM/yyyy').format(DateTime.parse(_eventos[index].date))}",
+                                    style: dateStyle,
+                                  ),
+                                ],
+                              ),
                             ),
-                            GapHomePage(height: 16),
-                            Text(
-                              _eventos[index].date,
-                              style: dateStyle,
-                            ),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                children: [
+                                  IconButton(
+                                      onPressed: () {},
+                                      icon: Icon(
+                                        Icons.chevron_right,
+                                        size: 32,
+                                      )),
+                                ],
+                              ),
+                            )
                           ],
                         ),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            children: [
-                              IconButton(
-                                  onPressed: () {},
-                                  icon: Icon(
-                                    Icons.chevron_right,
-                                    size: 32,
-                                  )),
-                            ],
-                          ),
-                        )
-                      ],
-                    ),
-                  )
-                ],
-              ),
-            );
-          }),
+                      )
+                    ],
+                  ),
+                );
+              }),
     );
   }
 }

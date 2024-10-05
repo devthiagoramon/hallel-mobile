@@ -39,12 +39,13 @@ final _router = GoRouter(initialLocation: initialRoute, routes: [
                 name: "home",
                 builder: (context, state) => const HomeScreen()),
             GoRoute(
-              path: "/home/quem-somos",
-              builder: (context, state) => const QuemSomosScreen(),
-            ),
+                path: "/home/quem-somos",
+                builder: (context, state) => const QuemSomosScreen(),
+                name: "home-quem-somos"),
           ]),
       GoRoute(
         path: "/profile",
+        name: "profile",
         builder: (context, state) => const ProfileScreen(),
       )
     ],

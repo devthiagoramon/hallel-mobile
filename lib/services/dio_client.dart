@@ -5,9 +5,9 @@ class DioClient {
   static var tokenApi = "";
 
   DioClient() : _dio = Dio() {
-    _dio.options.baseUrl = "http://10.0.2.2:8080/api";
+    _dio.options.baseUrl = "http://10.0.2.2:80/api";
     _dio.options.connectTimeout = Duration(seconds: 5);
-    _dio.options.receiveTimeout = Duration(seconds: 3);
+    _dio.options.receiveTimeout = Duration(seconds: 20);
   }
 
   Future<Response<T>> get<T>(String endpoint) async {
