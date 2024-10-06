@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'dart:developer';
 
 import 'package:dio/dio.dart';
@@ -8,6 +7,7 @@ import 'package:go_router/go_router.dart';
 import 'package:hallel/components/general/shimmer_container.dart';
 import 'package:hallel/model/eventos_model.dart';
 import 'package:hallel/services/dio_client.dart';
+import 'package:hallel/utils/utils.dart';
 import 'package:intl/intl.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -231,8 +231,8 @@ class _EventosCardHomePageState extends State<EventosCardHomePage> {
                                   topLeft: Radius.circular(8),
                                   topRight: Radius.circular(8)),
                               child: Image.memory(
-                                base64Decode(
-                                    _eventos[index].image.split(',').last),
+                                AppUtils()
+                                    .getImageByBase64(_eventos[index].image),
                                 fit: BoxFit.cover,
                                 height: 230,
                               ),

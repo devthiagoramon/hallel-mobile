@@ -15,7 +15,6 @@ class UserRoutesApi {
   }
 
   profileInfosByTokenService(String tokenApi) async {
-    print("/membros/perfil/token/${tokenApi.replaceFirst("Bearer ", "")}");
     try {
       Response response = await DioClient()
           .get("/membros/perfil/token/${tokenApi.replaceFirst("Bearer ", "")}");
