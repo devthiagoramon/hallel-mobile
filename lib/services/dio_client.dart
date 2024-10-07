@@ -13,6 +13,7 @@ class DioClient {
       if (tokenApi.isNotEmpty) {
         options.headers["Authorization"] = 'Bearer $tokenApi';
       }
+      options.headers["Content-Type"] = "application/json";
       return handler.next(options); // Continue com a requisição
     }));
 
@@ -34,6 +35,10 @@ class DioClient {
 
   Future<Response> post(String endpoint, {data}) async {
     return await _dio.post(endpoint, data: data);
+  }
+
+  Future<Response> patch(String endpoint, {data}) async {
+    return await _dio.patch(endpoint, data: data);
   }
 
   void setTokenApi(String tokenReceived) {

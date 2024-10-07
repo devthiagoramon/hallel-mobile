@@ -1,7 +1,12 @@
+import 'dart:convert';
 import 'dart:developer';
 
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_masked_text2/flutter_masked_text2.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hallel/model/user_model.dart';
+import 'package:hallel/services/dio_client.dart';
 import 'package:hallel/store/provider.dart';
 import 'package:hallel/utils/utils.dart';
 import 'package:intl/intl.dart';
@@ -75,20 +80,29 @@ class ProfileInfosContainer extends ConsumerWidget {
                   value: userObject.email,
                   hint: "email@gmail.com")),
           ModalsTextFieldsProfile(
-              props: ModalsTextFieldsProfileProps(
-                  title: "CPF",
-                  name: "cpf",
-                  value: userObject.cpf == ""
-                      ? "Nenhum CPF cadastrado"
-                      : userObject.cpf,
-                  hint: "111-222-333-44")),
+            props: ModalsTextFieldsProfileProps(
+                title: "CPF",
+                name: "cpf",
+                value: userObject.cpf == ""
+                    ? "Nenhum CPF cadastrado"
+                    : userObject.cpf,
+                hint: "111-222-333-44"),
+            textInputType: TextInputType.number,
+            maskedTextController: MaskedTextController(
+                mask: "000.000.000-00", text: userObject.cpf),
+          ),
           ModalsTextFieldsProfile(
               props: ModalsTextFieldsProfileProps(
                   title: "Data de nascimento",
                   name: "dataNascimento",
                   value: DateFormat('dd/MM/yyyy')
                       .format(DateTime.parse(userObject.dataNascimento)),
-                  hint: "11/11/2011")),
+                  hint: "11/11/2011"),
+              textInputType: TextInputType.number,
+              maskedTextController: MaskedTextController(
+                  mask: "00/00/0000",
+                  text: DateFormat('dd/MM/yyyy')
+                      .format(DateTime.parse(userObject.dataNascimento)))),
           ModalsTextFieldsProfile(
               props: ModalsTextFieldsProfileProps(
                   title: "Telefone",
@@ -96,7 +110,11 @@ class ProfileInfosContainer extends ConsumerWidget {
                   value: userObject.telefone == ""
                       ? "Nenhum telefone cadastrado"
                       : userObject.telefone,
-                  hint: "(92) 91234-5678"))
+                  hint: "(92) 91234-5678"),
+              textInputType: TextInputType.number,
+              maskedTextController: MaskedTextController(
+                  mask: "(00) 00000-0000",
+                  text: userObject.telefone == "" ? "" : userObject.telefone))
         ],
       ),
     );
@@ -116,17 +134,24 @@ class ModalsTextFieldsProfileProps {
   String hint;
 }
 
-class ModalsTextFieldsProfile extends StatefulWidget {
+class ModalsTextFieldsProfile extends ConsumerStatefulWidget {
   final ModalsTextFieldsProfileProps props;
+  final MaskedTextController? maskedTextController;
+  final TextInputType? textInputType;
 
-  ModalsTextFieldsProfile({super.key, required this.props});
+  ModalsTextFieldsProfile(
+      {super.key,
+      required this.props,
+      this.maskedTextController,
+      this.textInputType});
 
   @override
-  State<ModalsTextFieldsProfile> createState() =>
+  ConsumerState<ModalsTextFieldsProfile> createState() =>
       _ModalsTextFieldsProfileState();
 }
 
-class _ModalsTextFieldsProfileState extends State<ModalsTextFieldsProfile> {
+class _ModalsTextFieldsProfileState
+    extends ConsumerState<ModalsTextFieldsProfile> {
   bool _isEditable = false;
   String _editableValue = "";
   TextEditingController _controller = TextEditingController();
@@ -163,6 +188,59 @@ class _ModalsTextFieldsProfileState extends State<ModalsTextFieldsProfile> {
 
   Future<void> sendRequest() async {
     // TODO: IMPLEMENT UPDATE PERSONAL INFOS
+    User oldUser = ref.read(userProvider);
+    User updatedUser;
+
+    switch (widget.props.name) {
+      case "nome":
+        updatedUser = oldUser.copyWith(nome: _editableValue);
+        break;
+      case "dataNascimento":
+        DateTime parsedDate = DateFormat("dd/MM/yyyy").parse(_editableValue);
+        updatedUser =
+            oldUser.copyWith(dataNascimento: parsedDate.toIso8601String());
+        break;
+      case "email":
+        updatedUser = oldUser.copyWith(email: _editableValue);
+        break;
+      case "cpf":
+        updatedUser = oldUser.copyWith(cpf: _editableValue);
+        break;
+      case "telefone":
+        updatedUser = oldUser.copyWith(telefone: _editableValue);
+        break;
+      default:
+        throw ArgumentError('Campo desconhecido: ${widget.props.name}');
+    }
+    final body = jsonEncode({
+      'id': updatedUser.id,
+      'nome': updatedUser.nome,
+      'dataNascimento': updatedUser.dataNascimento,
+      'email': updatedUser.email,
+      'image': updatedUser.image,
+      'cpf': updatedUser.cpf,
+      'telefone': updatedUser.telefone,
+    });
+    try {
+      Response response =
+          await DioClient().patch("/membros/perfil", data: body);
+      if (response.data != null) {
+        ref.read(userProvider.notifier).updateUserWithUserObject(updatedUser);
+        if (!mounted) return;
+        setState(() {
+          _isEditable = false;
+          _editableValue = _editableValue;
+          widget.props.value = _editableValue;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text("Usuario atualizado com sucesso"),
+          backgroundColor: Colors.green,
+          duration: Duration(seconds: 2),
+        ));
+      }
+    } catch (e) {
+      log(e.toString(), name: "ProfileScreen");
+    }
   }
 
   @override
@@ -195,7 +273,8 @@ class _ModalsTextFieldsProfileState extends State<ModalsTextFieldsProfile> {
                 children: [
                   Expanded(
                     child: TextField(
-                      controller: _controller,
+                      controller: widget.maskedTextController ?? _controller,
+                      keyboardType: widget.textInputType ?? TextInputType.text,
                       decoration: InputDecoration(
                           border: UnderlineInputBorder(),
                           hintText: widget.props.hint),

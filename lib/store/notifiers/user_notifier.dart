@@ -24,4 +24,8 @@ class UserNotifier extends StateNotifier<User> {
         cpf: loginResponse["cpf"] ?? "",
         telefone: loginResponse["telefone"] ?? "");
   }
+
+  void updateUserWithUserObject(User user) {
+    state = user;
+  }
 }
