@@ -8,6 +8,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hallel/model/user_model.dart';
 import 'package:hallel/services/dio_client.dart';
 import 'package:hallel/store/provider.dart';
+import 'package:hallel/utils/image_picker.dart';
 import 'package:hallel/utils/utils.dart';
 import 'package:intl/intl.dart';
 
@@ -38,7 +39,12 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           mainAxisSize: MainAxisSize.max,
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: [ProfilePicture(), ProfileInfosContainer()],
+          children: [
+            ProfilePicture(
+              profilePicture: ref.read(userProvider).image,
+            ),
+            ProfileInfosContainer()
+          ],
         ),
       ),
     );
@@ -327,28 +333,74 @@ class _ModalsTextFieldsProfileState
   }
 }
 
-class ProfilePicture extends ConsumerWidget {
-  const ProfilePicture({
-    super.key,
-  });
+class ProfilePicture extends ConsumerStatefulWidget {
+  final String? profilePicture;
+  const ProfilePicture({super.key, required this.profilePicture});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final userObject = ref.read(userProvider);
+  ConsumerState<ProfilePicture> createState() => _ProfilePictureState();
+}
+
+class _ProfilePictureState extends ConsumerState<ProfilePicture> {
+  String? actualProfilePicture = "";
+
+  @override
+  void initState() {
+    super.initState();
+    setState(() {
+      actualProfilePicture = widget.profilePicture;
+    });
+  }
+
+  Future<void> editPhotoUser(BuildContext context, WidgetRef ref) async {
+    String? image = await ImagePickerUtil().pickImageAndConvertToBase64();
+
+    User user = ref.read(userProvider);
+    User updatedUser = user.copyWith(image: image);
+
+    final body = jsonEncode({
+      'id': updatedUser.id,
+      'nome': updatedUser.nome,
+      'dataNascimento': updatedUser.dataNascimento,
+      'email': updatedUser.email,
+      'image': updatedUser.image,
+      'cpf': updatedUser.cpf,
+      'telefone': updatedUser.telefone,
+    });
+    try {
+      Response response =
+          await DioClient().patch("/membros/perfil", data: body);
+      if (response.data != null) {
+        ref.read(userProvider.notifier).updateUserWithUserObject(updatedUser);
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text("Imagem do usuário atualizada com sucesso!"),
+          backgroundColor: Colors.green,
+          duration: Duration(seconds: 2),
+        ));
+      }
+    } catch (e) {
+      log(e.toString(), name: "ProfileScreen");
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Center(
       child: Column(
         children: [
           SizedBox(height: 24),
           Stack(
             children: [
-              ClipRRect(
-                borderRadius: BorderRadius.circular(999),
-                child: Image.memory(
-                  AppUtils().getImageByBase64(userObject.image),
-                  width: 250,
-                  height: 250,
-                ),
-              ),
+              actualProfilePicture != null && actualProfilePicture!.isNotEmpty
+                  ? ClipRRect(
+                      borderRadius: BorderRadius.circular(999),
+                      child: Image.memory(
+                        AppUtils().getImageByBase64(actualProfilePicture ?? ""),
+                        width: 250,
+                        height: 250,
+                      ),
+                    )
+                  : SizedBox(),
               Positioned(
                 right: 10,
                 top: 10,
@@ -359,7 +411,7 @@ class ProfilePicture extends ConsumerWidget {
                       child: Container(
                           color: Colors.blue,
                           child: IconButton(
-                              onPressed: () {},
+                              onPressed: () => editPhotoUser(context, ref),
                               iconSize: 32,
                               color: Colors.white,
                               icon: Icon(Icons.edit)))),
