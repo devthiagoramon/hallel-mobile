@@ -22,7 +22,9 @@ class TabsLayout extends StatefulWidget {
 class _TabsLayoutState extends State<TabsLayout> {
   final List<TabsLayoutModel> _tabsRoutes = [
     TabsLayoutModel(label: "Inicio", icon: Icons.home, route: "/home"),
-    TabsLayoutModel(label: "Perfil", icon: Icons.person, route: "/profile")
+    TabsLayoutModel(
+        label: "Ministerios", icon: Icons.groups_2, route: "/ministerio"),
+    TabsLayoutModel(label: "Perfil", icon: Icons.person, route: "/profile"),
   ];
 
   var currentIndexTab = 0;

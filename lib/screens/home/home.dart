@@ -244,7 +244,7 @@ class _EventosCardHomePageState extends State<EventosCardHomePage> {
                         padding: const EdgeInsets.all(16.0),
                         child: Row(
                           children: [
-                            Container(
+                            SizedBox(
                               width: 200,
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,

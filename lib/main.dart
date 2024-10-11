@@ -9,6 +9,7 @@ import 'package:hallel/screens/configs/tabs_config_home.dart';
 import 'package:hallel/screens/home/home.dart';
 import 'package:hallel/screens/home/quem-somos.dart';
 import 'package:hallel/screens/login.dart';
+import 'package:hallel/screens/ministerios/ministerio_main_screen.dart';
 import 'package:hallel/screens/profile/profile.dart';
 import 'package:hallel/screens/signin.dart';
 import 'package:hallel/services/dio_client.dart';
@@ -55,7 +56,12 @@ final _router = GoRouter(initialLocation: initialRoute, routes: [
               name: "profile",
               builder: (context, state) => const ProfileScreen(),
             )
-          ])
+          ]),
+      GoRoute(
+        path: "/ministerio",
+        name: "ministerio_main_screen",
+        builder: (context, state) => const MinisterioMainScreen(),
+      )
     ],
   )
 ]);

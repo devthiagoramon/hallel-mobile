@@ -30,3 +30,5 @@ flutter:
   assets:
     - assets/images/logo_hallel.png
     - assets/images/home_page_photo.svg
+    - assets/images/banner_ministerios_hallel_mobile.png
+    - assets/images/foto_do_ministerio_hallel.png
