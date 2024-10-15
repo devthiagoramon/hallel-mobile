@@ -101,6 +101,7 @@ class _MainContainerState extends ConsumerState<MainContainer> {
       final tokenApi = prefs.getString("tokenApi");
       if (tokenApi != null && tokenApi.isNotEmpty) {
         DioClient().setTokenApi(tokenApi);
+        print(tokenApi);
         try {
           final tokenValid =
               await UserRoutesApi().validateTokenUserService(tokenApi);

@@ -24,6 +24,14 @@ class Ministerio {
         viceCoordenadorId: obj['viceCoordenadorId'],
         descricao: obj['descricao'],
         imagem: obj['imagem'],
-        objetivos: obj['objetivos'] ?? []);
+        objetivos: List<String>.from(obj['objetivos'] ?? []));
+  }
+
+  static List<Ministerio> convertToListObjectByJson(dynamic list) {
+    List<Ministerio> listaMinisterio = [];
+    for (var obj in list) {
+      listaMinisterio.add(convertToObjectByJson(obj));
+    }
+    return listaMinisterio;
   }
 }
