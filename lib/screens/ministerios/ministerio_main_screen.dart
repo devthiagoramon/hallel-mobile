@@ -5,6 +5,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hallel/model/ministerio_model.dart';
+import 'package:hallel/model/status_membro_ministerio.dart';
 import 'package:hallel/services/dio_client.dart';
 import 'package:hallel/services/user_service/membro_ministerio_service.dart';
 import 'package:hallel/store/provider.dart';
@@ -84,18 +85,36 @@ class ModalMinisterioMembroContainer extends StatelessWidget {
   const ModalMinisterioMembroContainer({super.key, required this.ministerios});
   @override
   Widget build(BuildContext context) {
+    final titleStyle = TextStyle(fontSize: 26, fontWeight: FontWeight.bold);
+
     return SizedBox(
-      height: 300,
+      height: 350,
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: ministerios.isNotEmpty
-            ? ListView.builder(
-                itemCount: ministerios.length,
-                itemBuilder: (context, index) {
-                  return CardMinisterioMembro(
-                    ministerio: ministerios[index],
-                  );
-                },
+            ? Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    "Participação nos ministérios",
+                    textAlign: TextAlign.left,
+                    style: titleStyle,
+                  ),
+                  SizedBox(
+                    height: 16,
+                  ),
+                  Expanded(
+                    child: ListView.builder(
+                      itemCount: ministerios.length,
+                      itemBuilder: (context, index) {
+                        return CardMinisterioMembro(
+                          ministerio: ministerios[index],
+                        );
+                      },
+                    ),
+                  )
+                ],
               )
             : SizedBox(
                 width: 10,
@@ -106,27 +125,118 @@ class ModalMinisterioMembroContainer extends StatelessWidget {
   }
 }
 
-class CardMinisterioMembro extends StatelessWidget {
+class CardMinisterioMembro extends ConsumerStatefulWidget {
   final Ministerio ministerio;
   const CardMinisterioMembro({super.key, required this.ministerio});
+
+  @override
+  ConsumerState<CardMinisterioMembro> createState() =>
+      _CardMinisterioMembroState();
+}
+
+class _CardMinisterioMembroState extends ConsumerState<CardMinisterioMembro> {
+  StatusMembroMinisterio? _statusMembro;
+  bool loading = true;
+
+  Future<void> listStatusMembroInMinisterio() async {
+    try {
+      StatusMembroMinisterio? statusMembro = await MembroMinisterioServiceAPI()
+          .listStatusMembroMinisterioInMinisterio(
+              widget.ministerio.id ?? "", ref.read(userProvider).id);
+      setState(() {
+        _statusMembro = statusMembro;
+        loading = false;
+      });
+    } catch (e) {
+      log(e.toString(), name: "MinisterioMainScreen");
+      setState(() {
+        loading = false;
+      });
+    }
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    listStatusMembroInMinisterio();
+  }
+
+  String getStatusMembroText() {
+    switch (_statusMembro) {
+      case StatusMembroMinisterio.membro:
+        return "Membro";
+      case StatusMembroMinisterio.coordenador:
+        return "Coordenador";
+      case StatusMembroMinisterio.viceCoordenador:
+        return "Vice-coordenador";
+      default:
+        return "Error";
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final nameStyle = TextStyle(
         fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white);
+
+    final statusMinisterioTextStyle = TextStyle(
+        fontSize: 18, fontWeight: FontWeight.normal, color: Colors.white);
     return Card(
       color: Colors.green[900],
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       child: Padding(
         padding: const EdgeInsets.all(8.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.start,
+        child: Row(
           children: [
-            Text(
-              "${ministerio.nome}",
-              style: nameStyle,
-            )
+            Expanded(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    "${widget.ministerio.nome}",
+                    style: nameStyle,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  SizedBox(
+                    height: 8,
+                  ),
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.person,
+                        color: Colors.white,
+                        size: 24,
+                      ),
+                      SizedBox(
+                        width: 8,
+                      ),
+                      loading
+                          ? SizedBox(
+                              height: 24,
+                              width: 24,
+                              child: CircularProgressIndicator(
+                                color: Colors.white,
+                              ),
+                            )
+                          : Text(
+                              getStatusMembroText(),
+                              style: statusMinisterioTextStyle,
+                            )
+                    ],
+                  )
+                ],
+              ),
+            ),
+            IconButton(
+                onPressed: () {},
+                icon: Icon(
+                  Icons.chevron_right,
+                  size: 32,
+                  color: Colors.white,
+                ))
           ],
         ),
       ),

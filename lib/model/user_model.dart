@@ -39,4 +39,16 @@ class User {
       telefone: telefone ?? this.telefone,
     );
   }
+
+  static User convertJsonToUser(dynamic data) {
+    return User(
+        id: data["id"] ?? "",
+        nome: data["nome"] ?? "",
+        dataNascimento: data["dataNascimento"] ?? "",
+        email: data["email"] ?? "",
+        status: data["status"] ?? "",
+        image: data["image"] ?? "",
+        cpf: data["cpf"] ?? "",
+        telefone: data["telefone"] ?? "");
+  }
 }

@@ -2,6 +2,7 @@ import 'dart:developer';
 
 import 'package:dio/dio.dart';
 import 'package:hallel/model/ministerio_model.dart';
+import 'package:hallel/model/status_membro_ministerio.dart';
 import 'package:hallel/services/dio_client.dart';
 
 class MembroMinisterioServiceAPI {
@@ -14,6 +15,32 @@ class MembroMinisterioServiceAPI {
     } catch (e) {
       log(e.toString(), name: "MembroMinisterioServiceAPI");
       return [];
+    }
+  }
+
+  Future<StatusMembroMinisterio?> listStatusMembroMinisterioInMinisterio(
+      String idMinisterio, String idMembro) async {
+    try {
+      StatusMembroMinisterio status;
+      Response response = await DioClient()
+          .get("/membros/ministerio/status/$idMinisterio/$idMembro");
+      switch (response.toString()) {
+        case "MEMBRO":
+          status = StatusMembroMinisterio.membro;
+          break;
+        case "COORDENADOR":
+          status = StatusMembroMinisterio.coordenador;
+          break;
+        case "VICE_COORDENADOR":
+          status = StatusMembroMinisterio.viceCoordenador;
+          break;
+        default:
+          status = StatusMembroMinisterio.membro;
+      }
+      return status;
+    } catch (e) {
+      log(e.toString(), name: "MembroMinisterioServiceAPI");
+      return null;
     }
   }
 }
