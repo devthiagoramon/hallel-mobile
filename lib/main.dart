@@ -10,17 +10,20 @@ import 'package:hallel/screens/home/home.dart';
 import 'package:hallel/screens/home/quem-somos.dart';
 import 'package:hallel/screens/login.dart';
 import 'package:hallel/screens/ministerios/ministerio_main_screen.dart';
+import 'package:hallel/screens/ministerios/ministerio_panel/ministerio_panel_screen.dart';
 import 'package:hallel/screens/profile/profile.dart';
 import 'package:hallel/screens/signin.dart';
 import 'package:hallel/services/dio_client.dart';
 import 'package:hallel/services/user_service/user_api_routes.dart';
 import 'package:hallel/store/provider.dart';
+import 'package:intl/date_symbol_data_local.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 var initialRoute = "/";
 
 void main() {
-  runApp(ProviderScope(child: const MainApp()));
+  initializeDateFormatting()
+      .then((_) => runApp(ProviderScope(child: const MainApp())));
 }
 
 final _router = GoRouter(initialLocation: initialRoute, routes: [
@@ -61,6 +64,13 @@ final _router = GoRouter(initialLocation: initialRoute, routes: [
         path: "/ministerio",
         name: "ministerio_main_screen",
         builder: (context, state) => const MinisterioMainScreen(),
+      ),
+      GoRoute(
+        path: "/ministerio/panel",
+        builder: (context, state) {
+          final id = state.pathParameters["id"] ?? 'no-id';
+          return MinisterioPanelScreen(id: id);
+        },
       )
     ],
   )
@@ -101,7 +111,7 @@ class _MainContainerState extends ConsumerState<MainContainer> {
       final tokenApi = prefs.getString("tokenApi");
       if (tokenApi != null && tokenApi.isNotEmpty) {
         DioClient().setTokenApi(tokenApi);
-        print(tokenApi);
+
         try {
           final tokenValid =
               await UserRoutesApi().validateTokenUserService(tokenApi);

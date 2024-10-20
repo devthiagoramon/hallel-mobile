@@ -5,7 +5,9 @@ class Ministerio {
   String? viceCoordenadorId;
   String? descricao;
   String? imagem;
-  List<String> objetivos;
+  List<String>? objetivos;
+
+  Ministerio.empty();
 
   Ministerio(
       {required this.id,

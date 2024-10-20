@@ -19,6 +19,7 @@ dependencies:
   flutter_riverpod: ^2.1.2
   image_picker: ^0.8.6
   flutter_masked_text2: ^0.9.1
+  table_calendar: ^3.0.9
 
 dev_dependencies:
   flutter_test:

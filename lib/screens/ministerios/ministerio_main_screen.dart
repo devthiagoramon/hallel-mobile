@@ -4,6 +4,7 @@ import 'dart:developer';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:hallel/model/ministerio_model.dart';
 import 'package:hallel/model/status_membro_ministerio.dart';
 import 'package:hallel/services/dio_client.dart';
@@ -231,7 +232,15 @@ class _CardMinisterioMembroState extends ConsumerState<CardMinisterioMembro> {
               ),
             ),
             IconButton(
-                onPressed: () {},
+                onPressed: () {
+                  ref
+                      .read(ministerioPanelProvider.notifier)
+                      .selectMinisterio(widget.ministerio);
+                  context.go(Uri(
+                          path: "/ministerio/panel",
+                          queryParameters: {'id': widget.ministerio.id})
+                      .toString());
+                },
                 icon: Icon(
                   Icons.chevron_right,
                   size: 32,
