@@ -10,6 +10,7 @@ import 'package:hallel/screens/home/home.dart';
 import 'package:hallel/screens/home/quem-somos.dart';
 import 'package:hallel/screens/login.dart';
 import 'package:hallel/screens/ministerios/ministerio_main_screen.dart';
+import 'package:hallel/screens/ministerios/ministerio_panel/adicionar_editar_funcao_screen.dart';
 import 'package:hallel/screens/ministerios/ministerio_panel/ministerio_panel_screen.dart';
 import 'package:hallel/screens/profile/profile.dart';
 import 'package:hallel/screens/signin.dart';
@@ -71,7 +72,13 @@ final _router = GoRouter(initialLocation: initialRoute, routes: [
           final id = state.pathParameters["id"] ?? 'no-id';
           return MinisterioPanelScreen(id: id);
         },
-      )
+      ),
+      GoRoute(
+        path: "/ministerio/funcao/add",
+        builder: (context, state) {
+          return AdicionarEditarFuncaoScreen();
+        },
+      ),
     ],
   )
 ]);

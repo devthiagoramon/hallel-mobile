@@ -28,7 +28,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
   void setupListener(WidgetRef ref) {
     final nameUser = ref.read(userProvider).nome;
-    log('User name $nameUser', name: "ProfileScreen");
   }
 
   @override

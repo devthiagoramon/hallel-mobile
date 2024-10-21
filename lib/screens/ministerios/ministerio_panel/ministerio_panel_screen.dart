@@ -1,6 +1,10 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:hallel/services/dio_client.dart';
+import 'package:hallel/services/user_service/membro_ministerio_service.dart';
 import 'package:hallel/store/provider.dart';
 import 'package:table_calendar/table_calendar.dart';
 
@@ -42,6 +46,27 @@ class MinisterioPanelContainer extends ConsumerStatefulWidget {
 
 class _MinisterioPanelContainerState
     extends ConsumerState<MinisterioPanelContainer> {
+  Future<void> tokenCoordenador() async {
+    try {
+      String ministerioId = ref.read(ministerioPanelProvider).id ?? "";
+      String membroId = ref.read(userProvider).id;
+      String? token = await MembroMinisterioServiceAPI()
+          .getTokenCoordenador(ministerioId, membroId);
+      if (token != null) {
+        DioClient.setTokenCoordenador(token);
+      }
+    } catch (e) {
+      log(e.toString(), name: "MinisterioPanelScreen");
+    }
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    tokenCoordenador();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -104,7 +129,15 @@ class _FuncoesMinisterioContainerState
                     child: Text(value),
                   );
                 }).toList(),
-                onChanged: (String? newValue) {})
+                onChanged: (String? newValue) {
+                  switch (newValue) {
+                    case "Adicionar função":
+                      GoRouter.of(context).push("/ministerio/funcao/add");
+                      break;
+                    default:
+                      print("Invalid option!");
+                  }
+                })
           ],
         )
       ],

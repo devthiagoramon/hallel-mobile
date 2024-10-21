@@ -6,6 +6,9 @@ class FuncaoMinisterio {
   String? icone;
   String? cor;
 
+  FuncaoMinisterio.empty(
+      {this.id = "", this.ministerioId = "", this.nome = ""});
+
   FuncaoMinisterio({
     required this.id,
     required this.ministerioId,

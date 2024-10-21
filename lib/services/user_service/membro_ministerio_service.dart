@@ -43,4 +43,16 @@ class MembroMinisterioServiceAPI {
       return null;
     }
   }
+
+  Future<String?> getTokenCoordenador(
+      String ministerioId, String membroId) async {
+    try {
+      Response response = await DioClient().get(
+          "/membros/ministerio/token?ministerioId=$ministerioId&membroId=$membroId");
+      return response.data;
+    } catch (e) {
+      log(e.toString(), name: "MembroMinisterioServiceAPI");
+      return null;
+    }
+  }
 }
