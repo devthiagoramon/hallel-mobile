@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:dio/dio.dart';
 
 class DioClient {
@@ -35,16 +33,16 @@ class DioClient {
       },
     ));
 
-    _dio.interceptors.add(LogInterceptor(
-        request: true,
-        requestBody: true,
-        requestHeader: true,
-        responseBody: true,
-        error: true,
-        responseHeader: true,
-        logPrint: (object) {
-          log(object.toString(), name: "LOG INTERCEPTOR");
-        }));
+    // _dio.interceptors.add(LogInterceptor(
+    //     request: true,
+    //     requestBody: true,
+    //     requestHeader: true,
+    //     responseBody: true,
+    //     error: true,
+    //     responseHeader: true,
+    //     logPrint: (object) {
+    //       log(object.toString(), name: "LOG INTERCEPTOR");
+    //     }));
   }
 
   Future<Response<T>> get<T>(String endpoint) async {

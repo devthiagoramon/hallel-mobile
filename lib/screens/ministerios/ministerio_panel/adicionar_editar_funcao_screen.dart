@@ -67,6 +67,7 @@ class _AdicionarEditarFuncaoContainerState
   TextEditingController _iconController = TextEditingController();
   final _scrollController = ScrollController();
   bool _showEmojiPicker = false;
+  bool _isLoading = false;
 
   @override
   void initState() {
@@ -119,6 +120,9 @@ class _AdicionarEditarFuncaoContainerState
   Future<void> onButtonPressed() async {
     FuncaoMinisterio funcaoSelected = ref.read(adicionarEditarFuncaoProvider);
     if (funcaoSelected.id.isEmpty) {
+      setState(() {
+        _isLoading = true;
+      });
       FuncaoMinisterioDto dto = FuncaoMinisterioDto(
         ministerioId: ref.read(ministerioPanelProvider).id ?? "",
         nome: _nameController.text,
@@ -129,6 +133,9 @@ class _AdicionarEditarFuncaoContainerState
       bool funcaoMinisterioCreated =
           await FuncaoMinisterioServiceAPI().createFuncao(dto);
       if (funcaoMinisterioCreated) {
+        setState(() {
+          _isLoading = false;
+        });
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           content: Text("Função criada com sucesso!"),
           backgroundColor: Colors.green,
@@ -146,7 +153,7 @@ class _AdicionarEditarFuncaoContainerState
         backgroundColor: Colors.green[300], minimumSize: Size(300, 46));
     return Column(
       children: [
-        DioClient.isLoading()
+        _isLoading || DioClient.isLoading()
             ? LinearProgressIndicator(
                 color: Colors.blue,
                 backgroundColor: Colors.white,
