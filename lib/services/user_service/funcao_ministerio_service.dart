@@ -3,6 +3,7 @@ import 'dart:developer';
 
 import 'package:dio/dio.dart';
 import 'package:hallel/model/dtos/funcao_ministerio_dto.dart';
+import 'package:hallel/model/funcao_ministerio.dart';
 import 'package:hallel/services/dio_client.dart';
 
 class FuncaoMinisterioServiceAPI {
@@ -21,6 +22,18 @@ class FuncaoMinisterioServiceAPI {
     } catch (e) {
       log(e.toString(), name: "FuncaoMinisterioAPI");
       return false;
+    }
+  }
+
+  Future<List<FuncaoMinisterio>> listFuncaoMinisterioAPI(
+      String idMinisterio) async {
+    try {
+      Response response = await DioClient().get(
+          "/membros/ministerio/coordenador/funcao/ministerio/$idMinisterio");
+      return FuncaoMinisterio.convertJsonToListFuncaoMinisterio(response.data);
+    } catch (e) {
+      log(e.toString(), name: "FuncaoMinisterioServiceAPI");
+      return [];
     }
   }
 }

@@ -3,7 +3,9 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:hallel/model/funcao_ministerio.dart';
 import 'package:hallel/services/dio_client.dart';
+import 'package:hallel/services/user_service/funcao_ministerio_service.dart';
 import 'package:hallel/services/user_service/membro_ministerio_service.dart';
 import 'package:hallel/store/provider.dart';
 import 'package:table_calendar/table_calendar.dart';
@@ -92,16 +94,56 @@ class _MinisterioPanelContainerState
   }
 }
 
-class FuncoesMinisterioContainer extends StatefulWidget {
+class FuncoesMinisterioContainer extends ConsumerStatefulWidget {
   const FuncoesMinisterioContainer({super.key});
 
   @override
-  State<FuncoesMinisterioContainer> createState() =>
+  ConsumerState<FuncoesMinisterioContainer> createState() =>
       _FuncoesMinisterioContainerState();
 }
 
 class _FuncoesMinisterioContainerState
-    extends State<FuncoesMinisterioContainer> {
+    extends ConsumerState<FuncoesMinisterioContainer> {
+  String? filterValue = "Nome";
+  List<FuncaoMinisterio> funcoesMinisterio = [];
+  bool _isLoading = true;
+
+  Future<void> listFuncoesMinisterio() async {
+    try {
+      String ministerioId = ref.read(ministerioPanelProvider).id ?? "";
+      List<FuncaoMinisterio> funcoesMinisteriosResponse =
+          await FuncaoMinisterioServiceAPI()
+              .listFuncaoMinisterioAPI(ministerioId);
+      setState(() {
+        funcoesMinisterio = funcoesMinisteriosResponse;
+        _isLoading = false;
+      });
+    } catch (e) {
+      log(e.toString(), name: "MinisterioPanelScreen");
+    }
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    listFuncoesMinisterio();
+  }
+
+  @override
+  void didUpdateWidget(covariant FuncoesMinisterioContainer oldWidget) {
+    // TODO: implement didUpdateWidget
+    super.didUpdateWidget(oldWidget);
+  }
+
+  Color hexToColor(String hexColor) {
+    hexColor = hexColor.replaceAll("#", '');
+    if (hexColor.length == 6) {
+      hexColor = 'FF$hexColor';
+    }
+    return Color(int.parse(hexColor, radix: 16));
+  }
+
   @override
   Widget build(BuildContext context) {
     final funcoesMinisterioTextStyle =
@@ -123,6 +165,7 @@ class _FuncoesMinisterioContainerState
                   Icons.more_vert,
                   size: 32,
                 ),
+                underline: SizedBox(),
                 items: ["Adicionar função"].map((String value) {
                   return DropdownMenuItem(
                     value: value,
@@ -139,6 +182,96 @@ class _FuncoesMinisterioContainerState
                   }
                 })
           ],
+        ),
+        _isLoading
+            ? LinearProgressIndicator(
+                color: Colors.blue,
+              )
+            : SizedBox(),
+        DropdownButton(
+            hint: Text("Selecione um valor"),
+            borderRadius: BorderRadius.all(Radius.circular(24)),
+            elevation: 2,
+            value: filterValue,
+            items: ["Nome"].map((String value) {
+              return DropdownMenuItem(
+                value: value,
+                child: Text(value),
+              );
+            }).toList(),
+            onChanged: (String? newValue) {
+              setState(() {
+                filterValue = newValue;
+              });
+            }),
+        SizedBox(
+          height: 300,
+          child: ListView.builder(
+            itemCount: funcoesMinisterio.length,
+            itemBuilder: (context, index) {
+              return Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 60,
+                      height: 60,
+                      decoration: BoxDecoration(
+                        color: hexToColor(funcoesMinisterio[index].cor ?? ""),
+                        borderRadius: BorderRadius.all(Radius.circular(999)),
+                      ),
+                    ),
+                    SizedBox(
+                      width: 16,
+                    ),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          Text(
+                            funcoesMinisterio[index].nome,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                                fontSize: 20, fontWeight: FontWeight.w500),
+                          ),
+                          SizedBox(height: 2),
+                          Text(
+                            funcoesMinisterio[index].descricao!,
+                            style: TextStyle(
+                                fontSize: 16, fontWeight: FontWeight.normal),
+                          ),
+                        ],
+                      ),
+                    ),
+                    DropdownButton(
+                        icon: Icon(
+                          Icons.more_vert,
+                          size: 32,
+                        ),
+                        underline: SizedBox(),
+                        items: ["Editar função"].map((String value) {
+                          return DropdownMenuItem(
+                            value: value,
+                            child: Text(value),
+                          );
+                        }).toList(),
+                        onChanged: (String? newValue) {
+                          switch (newValue) {
+                            case "Editar função":
+                              GoRouter.of(context)
+                                  .push("/ministerio/funcao/add");
+                              break;
+                            default:
+                              print("Invalid option!");
+                          }
+                        })
+                  ],
+                ),
+              );
+            },
+          ),
         )
       ],
     );
