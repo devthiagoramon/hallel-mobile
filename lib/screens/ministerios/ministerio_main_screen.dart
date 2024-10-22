@@ -176,6 +176,30 @@ class _CardMinisterioMembroState extends ConsumerState<CardMinisterioMembro> {
     }
   }
 
+  Future<void> tokenCoordenador(String ministerioId) async {
+    try {
+      String membroId = ref.read(userProvider).id;
+      String? token = await MembroMinisterioServiceAPI()
+          .getTokenCoordenador(ministerioId, membroId);
+      if (token != null) {
+        DioClient.setTokenCoordenador(token);
+      }
+    } catch (e) {
+      log(e.toString(), name: "MinisterioMainScreen");
+    }
+  }
+
+  Future<void> selectMinisterio() async {
+    ref
+        .read(ministerioPanelProvider.notifier)
+        .selectMinisterio(widget.ministerio);
+    await tokenCoordenador(widget.ministerio.id ?? "");
+    if (!mounted) return;
+    context.go(Uri(
+        path: "/ministerio/panel",
+        queryParameters: {'id': widget.ministerio.id}).toString());
+  }
+
   @override
   Widget build(BuildContext context) {
     final nameStyle = TextStyle(
@@ -232,15 +256,7 @@ class _CardMinisterioMembroState extends ConsumerState<CardMinisterioMembro> {
               ),
             ),
             IconButton(
-                onPressed: () {
-                  ref
-                      .read(ministerioPanelProvider.notifier)
-                      .selectMinisterio(widget.ministerio);
-                  context.go(Uri(
-                          path: "/ministerio/panel",
-                          queryParameters: {'id': widget.ministerio.id})
-                      .toString());
-                },
+                onPressed: selectMinisterio,
                 icon: Icon(
                   Icons.chevron_right,
                   size: 32,

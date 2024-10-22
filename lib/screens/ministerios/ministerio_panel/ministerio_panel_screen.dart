@@ -3,10 +3,10 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:hallel/components/general/popup_menu_h.dart';
 import 'package:hallel/model/funcao_ministerio.dart';
 import 'package:hallel/services/dio_client.dart';
 import 'package:hallel/services/user_service/funcao_ministerio_service.dart';
-import 'package:hallel/services/user_service/membro_ministerio_service.dart';
 import 'package:hallel/store/provider.dart';
 import 'package:table_calendar/table_calendar.dart';
 
@@ -24,6 +24,7 @@ class MinisterioPanelScreen extends ConsumerWidget {
           ),
           leading: IconButton(
               onPressed: () {
+                DioClient.setTokenCoordenador("");
                 GoRouter.of(context).go("/ministerio");
               },
               icon: Icon(
@@ -48,25 +49,10 @@ class MinisterioPanelContainer extends ConsumerStatefulWidget {
 
 class _MinisterioPanelContainerState
     extends ConsumerState<MinisterioPanelContainer> {
-  Future<void> tokenCoordenador() async {
-    try {
-      String ministerioId = ref.read(ministerioPanelProvider).id ?? "";
-      String membroId = ref.read(userProvider).id;
-      String? token = await MembroMinisterioServiceAPI()
-          .getTokenCoordenador(ministerioId, membroId);
-      if (token != null) {
-        DioClient.setTokenCoordenador(token);
-      }
-    } catch (e) {
-      log(e.toString(), name: "MinisterioPanelScreen");
-    }
-  }
-
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    tokenCoordenador();
   }
 
   @override
@@ -160,27 +146,18 @@ class _FuncoesMinisterioContainerState
                 style: funcoesMinisterioTextStyle,
               ),
             ),
-            DropdownButton(
-                icon: Icon(
-                  Icons.more_vert,
-                  size: 32,
-                ),
-                underline: SizedBox(),
-                items: ["Adicionar função"].map((String value) {
-                  return DropdownMenuItem(
-                    value: value,
-                    child: Text(value),
-                  );
-                }).toList(),
-                onChanged: (String? newValue) {
-                  switch (newValue) {
-                    case "Adicionar função":
-                      GoRouter.of(context).push("/ministerio/funcao/add");
-                      break;
-                    default:
-                      print("Invalid option!");
-                  }
-                })
+            PopupMenuH(iconSize: 32, items: [
+              PopupMenuHItem(
+                  label: "Adicionar função",
+                  icon: Icon(
+                    Icons.add,
+                    color: Colors.green,
+                    size: 24,
+                  ),
+                  onPress: () {
+                    GoRouter.of(context).push("/ministerio/funcao/add");
+                  })
+            ])
           ],
         ),
         _isLoading
@@ -205,7 +182,7 @@ class _FuncoesMinisterioContainerState
               });
             }),
         SizedBox(
-          height: 300,
+          height: 200,
           child: ListView.builder(
             itemCount: funcoesMinisterio.length,
             itemBuilder: (context, index) {
@@ -239,34 +216,31 @@ class _FuncoesMinisterioContainerState
                           SizedBox(height: 2),
                           Text(
                             funcoesMinisterio[index].descricao!,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                             style: TextStyle(
                                 fontSize: 16, fontWeight: FontWeight.normal),
                           ),
                         ],
                       ),
                     ),
-                    DropdownButton(
-                        icon: Icon(
-                          Icons.more_vert,
-                          size: 32,
-                        ),
-                        underline: SizedBox(),
-                        items: ["Editar função"].map((String value) {
-                          return DropdownMenuItem(
-                            value: value,
-                            child: Text(value),
-                          );
-                        }).toList(),
-                        onChanged: (String? newValue) {
-                          switch (newValue) {
-                            case "Editar função":
-                              GoRouter.of(context)
-                                  .push("/ministerio/funcao/add");
-                              break;
-                            default:
-                              print("Invalid option!");
-                          }
-                        })
+                    PopupMenuH(icon: Icons.more_horiz, items: [
+                      PopupMenuHItem(
+                          label: "Editar",
+                          icon: Icon(
+                            Icons.edit,
+                            color: Colors.blue,
+                            size: 24,
+                          ),
+                          onPress: () {}),
+                      PopupMenuHItem(
+                          label: "Excluir",
+                          icon: Icon(
+                            Icons.delete,
+                            color: Colors.red,
+                          ),
+                          onPress: () {})
+                    ])
                   ],
                 ),
               );
