@@ -57,6 +57,10 @@ class DioClient {
     return await _dio.patch(endpoint, data: data);
   }
 
+  Future<Response> put(String endpoint, {data}) async {
+    return await _dio.put(endpoint, data: data);
+  }
+
   void setTokenApi(String tokenReceived) {
     tokenApi = tokenReceived;
   }

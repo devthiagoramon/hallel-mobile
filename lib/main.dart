@@ -79,6 +79,12 @@ final _router = GoRouter(initialLocation: initialRoute, routes: [
           return AdicionarEditarFuncaoScreen();
         },
       ),
+      GoRoute(
+        path: "/ministerio/funcao/edit",
+        builder: (context, state) {
+          return AdicionarEditarFuncaoScreen();
+        },
+      )
     ],
   )
 ]);

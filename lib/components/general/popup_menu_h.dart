@@ -26,6 +26,7 @@ class PopupMenuH extends StatelessWidget {
       itemBuilder: (context) {
         return items.map((item) {
           return PopupMenuItem<PopupMenuHItem>(
+            onTap: item.onPress,
             child: Row(
               children: [
                 item.icon,

@@ -120,6 +120,7 @@ class _FuncoesMinisterioContainerState
   void didUpdateWidget(covariant FuncoesMinisterioContainer oldWidget) {
     // TODO: implement didUpdateWidget
     super.didUpdateWidget(oldWidget);
+    listFuncoesMinisterio();
   }
 
   Color hexToColor(String hexColor) {
@@ -232,7 +233,14 @@ class _FuncoesMinisterioContainerState
                             color: Colors.blue,
                             size: 24,
                           ),
-                          onPress: () {}),
+                          onPress: () {
+                            ref
+                                .read(adicionarEditarFuncaoProvider.notifier)
+                                .selectFuncaoMinisterio(
+                                    funcoesMinisterio[index]);
+                            GoRouter.of(context)
+                                .push("/ministerio/funcao/edit");
+                          }),
                       PopupMenuHItem(
                           label: "Excluir",
                           icon: Icon(

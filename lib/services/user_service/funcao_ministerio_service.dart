@@ -21,7 +21,27 @@ class FuncaoMinisterioServiceAPI {
       return true;
     } catch (e) {
       log(e.toString(), name: "FuncaoMinisterioAPI");
-      return false;
+      throw Exception("Erro ao adicionar a função, tente novamente!");
+    }
+  }
+
+  Future<bool> editFuncao(
+      String idFuncaoMinisterio, FuncaoMinisterioDto data) async {
+    try {
+      final body = jsonEncode({
+        "ministerioId": data.ministerioId,
+        "nome": data.nome,
+        "descricao": data.descricao,
+        "icone": data.icone,
+        "cor": data.cor,
+      });
+      await DioClient().put(
+          "/membros/ministerio/coordenador/funcao/$idFuncaoMinisterio",
+          data: body);
+      return true;
+    } catch (e) {
+      log(e.toString(), name: "FuncaoMinisteiroAPI");
+      throw Exception("Erro ao editar a função, tente novamente!");
     }
   }
 

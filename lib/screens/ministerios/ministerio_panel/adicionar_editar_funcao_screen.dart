@@ -119,32 +119,58 @@ class _AdicionarEditarFuncaoContainerState
 
   Future<void> onButtonPressed() async {
     FuncaoMinisterio funcaoSelected = ref.read(adicionarEditarFuncaoProvider);
-    if (funcaoSelected.id.isEmpty) {
-      setState(() {
-        _isLoading = true;
-      });
-      FuncaoMinisterioDto dto = FuncaoMinisterioDto(
-        ministerioId: ref.read(ministerioPanelProvider).id ?? "",
-        nome: _nameController.text,
-        descricao: _descricaoController.text,
-        cor: colorToHex(_colorFunction),
-        icone: _iconController.text,
-      );
-      bool funcaoMinisterioCreated =
-          await FuncaoMinisterioServiceAPI().createFuncao(dto);
-      if (funcaoMinisterioCreated) {
-        setState(() {
-          _isLoading = false;
-        });
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text("Função criada com sucesso!"),
-          backgroundColor: Colors.green,
-          duration: Duration(seconds: 2),
-        ));
-        if (!mounted) return;
-        GoRouter.of(context).pop();
+    FuncaoMinisterioDto dto = FuncaoMinisterioDto(
+      ministerioId: ref.read(ministerioPanelProvider).id ?? "",
+      nome: _nameController.text,
+      descricao: _descricaoController.text,
+      cor: colorToHex(_colorFunction),
+      icone: _iconController.text,
+    );
+    setState(() {
+      _isLoading = true;
+    });
+    try {
+      if (funcaoSelected.id.isEmpty) {
+        bool funcaoMinisterioCreated =
+            await FuncaoMinisterioServiceAPI().createFuncao(dto);
+        if (funcaoMinisterioCreated) {
+          setState(() {
+            _isLoading = false;
+          });
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text("Função criada com sucesso!"),
+            backgroundColor: Colors.green,
+            duration: Duration(seconds: 2),
+          ));
+          if (!mounted) return;
+          GoRouter.of(context).pop();
+        }
+      } else {
+        bool funcaoMinisterioEdited = await FuncaoMinisterioServiceAPI()
+            .editFuncao(funcaoSelected.id, dto);
+        if (funcaoMinisterioEdited) {
+          setState(() {
+            _isLoading = false;
+          });
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text("Função editada com sucesso!"),
+            backgroundColor: Colors.green,
+            duration: Duration(seconds: 2),
+          ));
+          if (!mounted) return;
+          GoRouter.of(context).pop();
+        }
       }
-    } else {}
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text(e.toString()),
+        backgroundColor: Colors.red,
+        duration: Duration(seconds: 2),
+      ));
+    }
   }
 
   @override
@@ -270,7 +296,9 @@ class _AdicionarEditarFuncaoContainerState
                             }
                           },
                           child: Text(
-                            "Adicionar",
+                            ref.read(adicionarEditarFuncaoProvider).id.isEmpty
+                                ? "Adicionar"
+                                : "Editar",
                             style: TextStyle(fontSize: 18),
                           )),
                     )
