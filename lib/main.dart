@@ -9,6 +9,7 @@ import 'package:hallel/screens/configs/tabs_config_home.dart';
 import 'package:hallel/screens/home/home.dart';
 import 'package:hallel/screens/home/quem-somos.dart';
 import 'package:hallel/screens/login.dart';
+import 'package:hallel/screens/ministerios/ministerio_detalhes_screen.dart';
 import 'package:hallel/screens/ministerios/ministerio_main_screen.dart';
 import 'package:hallel/screens/ministerios/ministerio_panel/adicionar_editar_funcao_screen.dart';
 import 'package:hallel/screens/ministerios/ministerio_panel/ministerio_panel_screen.dart';
@@ -65,6 +66,11 @@ final _router = GoRouter(initialLocation: initialRoute, routes: [
         path: "/ministerio",
         name: "ministerio_main_screen",
         builder: (context, state) => const MinisterioMainScreen(),
+      ),
+      GoRoute(
+        path: "/ministerio/detail",
+        name: "ministerio_detalhe_screen",
+        builder: (context, state) => const MinisterioDetalhesScreen(),
       ),
       GoRoute(
         path: "/ministerio/panel",

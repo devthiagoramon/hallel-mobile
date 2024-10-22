@@ -9,6 +9,7 @@ import 'package:hallel/model/ministerio_model.dart';
 import 'package:hallel/model/status_membro_ministerio.dart';
 import 'package:hallel/services/dio_client.dart';
 import 'package:hallel/services/user_service/membro_ministerio_service.dart';
+import 'package:hallel/services/user_service/ministerio_service.dart';
 import 'package:hallel/store/provider.dart';
 import 'package:hallel/utils/utils.dart';
 
@@ -292,15 +293,16 @@ class _MinisterioMainContainerState extends State<MinisterioMainContainer> {
   }
 }
 
-class CardsMinisterioComunidade extends StatefulWidget {
+class CardsMinisterioComunidade extends ConsumerStatefulWidget {
   const CardsMinisterioComunidade({super.key});
 
   @override
-  State<CardsMinisterioComunidade> createState() =>
+  ConsumerState<CardsMinisterioComunidade> createState() =>
       _CardsMinisterioComunidadeState();
 }
 
-class _CardsMinisterioComunidadeState extends State<CardsMinisterioComunidade> {
+class _CardsMinisterioComunidadeState
+    extends ConsumerState<CardsMinisterioComunidade> {
   final PageController _pageController = PageController(initialPage: 0);
   Timer? _timer;
   int _currentPage = 0;
@@ -416,7 +418,16 @@ class _CardsMinisterioComunidadeState extends State<CardsMinisterioComunidade> {
                     child: SizedBox(
                       width: MediaQuery.of(context).size.width,
                       child: FilledButton(
-                        onPressed: () {},
+                        onPressed: () async {
+                          Ministerio ministerioWithDetails =
+                              await MinisterioService()
+                                  .listMinisterioWithDetails(
+                                      _ministerios[index].id ?? "");
+                          ref
+                              .read(ministerioDetalheProvider.notifier)
+                              .selectMinisterio(ministerioWithDetails);
+                          GoRouter.of(context).push("/ministerio/detail");
+                        },
                         style: FilledButton.styleFrom(
                             backgroundColor: Color.fromARGB(255, 6, 97, 46)),
                         child: Text(
