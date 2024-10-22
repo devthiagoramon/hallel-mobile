@@ -45,6 +45,18 @@ class FuncaoMinisterioServiceAPI {
     }
   }
 
+  Future<bool> deleteFuncao(String idFuncaoMinisterio) async {
+    try {
+      await DioClient().delete(
+        "/membros/ministerio/coordenador/funcao/$idFuncaoMinisterio",
+      );
+      return true;
+    } catch (e) {
+      log(e.toString(), name: "FuncaoMinisteiroAPI");
+      throw Exception("Erro ao excluir a função, tente novamente!");
+    }
+  }
+
   Future<List<FuncaoMinisterio>> listFuncaoMinisterioAPI(
       String idMinisterio) async {
     try {

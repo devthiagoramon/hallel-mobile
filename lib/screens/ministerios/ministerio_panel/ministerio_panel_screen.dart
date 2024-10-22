@@ -8,6 +8,7 @@ import 'package:hallel/model/funcao_ministerio.dart';
 import 'package:hallel/services/dio_client.dart';
 import 'package:hallel/services/user_service/funcao_ministerio_service.dart';
 import 'package:hallel/store/provider.dart';
+import 'package:hallel/utils/utils.dart';
 import 'package:table_calendar/table_calendar.dart';
 
 class MinisterioPanelScreen extends ConsumerWidget {
@@ -131,6 +132,34 @@ class _FuncoesMinisterioContainerState
     return Color(int.parse(hexColor, radix: 16));
   }
 
+  Future<void> deleteFuncao(String funcaoMinisterioId) async {
+    try {
+      bool response =
+          await FuncaoMinisterioServiceAPI().deleteFuncao(funcaoMinisterioId);
+      if (response) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text("Função excluida com sucesso!"),
+          backgroundColor: Colors.blue,
+          duration: Duration(seconds: 2),
+        ));
+        List<FuncaoMinisterio> listaUpdated = funcoesMinisterio
+            .where((element) => element.id != funcaoMinisterioId)
+            .toList();
+        setState(() {
+          funcoesMinisterio = listaUpdated;
+        });
+      }
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text(e.toString()),
+        backgroundColor: Colors.red,
+        duration: Duration(seconds: 2),
+      ));
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final funcoesMinisterioTextStyle =
@@ -247,7 +276,10 @@ class _FuncoesMinisterioContainerState
                             Icons.delete,
                             color: Colors.red,
                           ),
-                          onPress: () {})
+                          onPress: () => AppUtils.modalDelete(
+                                  context, "Excluir função", () async {
+                                deleteFuncao(funcoesMinisterio[index].id);
+                              }))
                     ])
                   ],
                 ),

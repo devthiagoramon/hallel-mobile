@@ -61,6 +61,10 @@ class DioClient {
     return await _dio.put(endpoint, data: data);
   }
 
+  Future<Response> delete(String endpoint) async {
+    return await _dio.delete(endpoint);
+  }
+
   void setTokenApi(String tokenReceived) {
     tokenApi = tokenReceived;
   }
