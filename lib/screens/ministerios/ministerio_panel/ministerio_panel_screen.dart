@@ -5,7 +5,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hallel/components/general/popup_menu_h.dart';
 import 'package:hallel/model/funcao_ministerio.dart';
+import 'package:hallel/model/membro_ministerio_model.dart';
 import 'package:hallel/services/dio_client.dart';
+import 'package:hallel/services/user_service/coordenador_ministerio_service.dart';
 import 'package:hallel/services/user_service/funcao_ministerio_service.dart';
 import 'package:hallel/store/provider.dart';
 import 'package:hallel/utils/utils.dart';
@@ -170,6 +172,11 @@ class _FuncoesMinisterioContainerState
       children: [
         Row(
           children: [
+            _isLoading
+                ? LinearProgressIndicator(
+                    color: Colors.blue,
+                  )
+                : SizedBox(),
             Expanded(
               child: Text(
                 "Funções",
@@ -190,11 +197,6 @@ class _FuncoesMinisterioContainerState
             ])
           ],
         ),
-        _isLoading
-            ? LinearProgressIndicator(
-                color: Colors.blue,
-              )
-            : SizedBox(),
         DropdownButton(
             hint: Text("Selecione um valor"),
             borderRadius: BorderRadius.all(Radius.circular(24)),
@@ -292,19 +294,56 @@ class _FuncoesMinisterioContainerState
   }
 }
 
-class MembrosMinisterioContainer extends StatefulWidget {
+class MembrosMinisterioContainer extends ConsumerStatefulWidget {
   const MembrosMinisterioContainer({
     super.key,
   });
 
   @override
-  State<MembrosMinisterioContainer> createState() =>
+  ConsumerState<MembrosMinisterioContainer> createState() =>
       _MembrosMinisterioContainerState();
 }
 
 class _MembrosMinisterioContainerState
-    extends State<MembrosMinisterioContainer> {
+    extends ConsumerState<MembrosMinisterioContainer> {
   String? filterValue = "Nome";
+  List<MembroMinisterio> _membrosMinisterio = [];
+  bool _isLoading = false;
+
+  Future<void> listMembrosMinisterio() async {
+    setState(() {
+      _isLoading = true;
+    });
+    try {
+      List<MembroMinisterio> membrosMinisterioResponse =
+          await CoordenadorMinisterioService()
+              .listMembrosMinisterioOfMinisterio(
+                  ref.read(ministerioPanelProvider).id ?? "");
+      setState(() {
+        _membrosMinisterio = membrosMinisterioResponse;
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+      });
+      log(e.toString(), name: "MinisterioPanelScreen");
+    }
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    listMembrosMinisterio();
+  }
+
+  @override
+  void didUpdateWidget(covariant MembrosMinisterioContainer oldWidget) {
+    // TODO: implement didUpdateWidget
+    super.didUpdateWidget(oldWidget);
+    listMembrosMinisterio();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -314,26 +353,118 @@ class _MembrosMinisterioContainerState
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
-        Text(
-          "Membros do ministério",
-          style: membroMinisterioTextStyle,
+        _isLoading
+            ? LinearProgressIndicator(
+                color: Colors.blue,
+              )
+            : SizedBox(),
+        Row(
+          children: [
+            Expanded(
+              child: Text(
+                "Membros do ministério",
+                style: membroMinisterioTextStyle,
+              ),
+            ),
+            PopupMenuH(iconSize: 32, items: [
+              PopupMenuHItem(
+                  label: "Adicionar membros",
+                  icon: Icon(
+                    Icons.add,
+                    color: Colors.green,
+                    size: 24,
+                  ),
+                  onPress: () {
+                    GoRouter.of(context)
+                        .push("/ministerio/membroMinisterio/add");
+                  })
+            ])
+          ],
         ),
-        DropdownButton(
-            hint: Text("Selecione um valor"),
-            borderRadius: BorderRadius.all(Radius.circular(24)),
-            elevation: 2,
-            value: filterValue,
-            items: ["Nome", "Função"].map((String value) {
-              return DropdownMenuItem(
-                value: value,
-                child: Text(value),
+        PopupMenuH(value: filterValue, icon: Icons.arrow_drop_down, items: [
+          PopupMenuHItem(
+              label: "Nome",
+              icon: Icon(Icons.text_fields_sharp),
+              onPress: () {
+                setState(() {
+                  filterValue = "Nome";
+                });
+              }),
+          PopupMenuHItem(
+              label: "Função",
+              icon: Icon(Icons.badge),
+              onPress: () {
+                setState(() {
+                  filterValue = "Função";
+                });
+              })
+        ]),
+        SizedBox(
+          height: 175,
+          child: ListView.builder(
+            itemCount: _membrosMinisterio.length,
+            itemBuilder: (context, index) {
+              return Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 0),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    CircleAvatar(
+                      radius: 26,
+                      backgroundImage:
+                          _membrosMinisterio[index].membro!.image.isNotEmpty
+                              ? MemoryImage(AppUtils().getImageByBase64(
+                                  _membrosMinisterio[index].membro!.image))
+                              : null,
+                      backgroundColor: AppUtils().getRandomColor(),
+                    ),
+                    SizedBox(
+                      width: 16,
+                    ),
+                    Expanded(
+                        child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        Text(
+                          _membrosMinisterio[index].membro!.nome,
+                          style: TextStyle(
+                              fontSize: 18, fontWeight: FontWeight.normal),
+                        ),
+                        Text(
+                          _membrosMinisterio[index]
+                              .funcoesMinisterio!
+                              .map((item) => item.nome)
+                              .join(', '),
+                          style: TextStyle(
+                              fontSize: 14, fontWeight: FontWeight.normal),
+                        ),
+                      ],
+                    )),
+                    PopupMenuH(icon: Icons.more_horiz, items: [
+                      PopupMenuHItem(
+                          label: "Funções",
+                          icon: Icon(
+                            Icons.label,
+                            size: 24,
+                            color: Colors.blue,
+                          ),
+                          onPress: () {}),
+                      PopupMenuHItem(
+                          label: "Retirar membro",
+                          icon: Icon(
+                            Icons.person_remove,
+                            size: 24,
+                            color: Colors.red,
+                          ),
+                          onPress: () {})
+                    ])
+                  ],
+                ),
               );
-            }).toList(),
-            onChanged: (String? newValue) {
-              setState(() {
-                filterValue = newValue;
-              });
-            })
+            },
+          ),
+        )
       ],
     );
   }

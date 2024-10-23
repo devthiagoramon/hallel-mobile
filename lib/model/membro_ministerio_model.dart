@@ -41,4 +41,13 @@ class MembroMinisterio {
         Ministerio.convertToObjectByJson(data["ministerio"]);
     return membroMinisterio;
   }
+
+  List<MembroMinisterio> convertJsonToListCompleteMembroMinisterio(
+      dynamic list) {
+    List<MembroMinisterio> listaMembroMinisterio = [];
+    for (var obj in list) {
+      listaMembroMinisterio.add(convertJsonToCompleteMembroMinisterio(obj));
+    }
+    return listaMembroMinisterio;
+  }
 }

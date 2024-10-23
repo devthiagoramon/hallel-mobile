@@ -25,11 +25,9 @@ class _MinisterioMainScreenState extends ConsumerState<MinisterioMainScreen> {
   List<Ministerio> _ministerios = [];
 
   Future<void> ministeriosThatMembroParticipate() async {
-    log(ref.read(userProvider).id);
     try {
       List<Ministerio> ministeriosResponse = await MembroMinisterioServiceAPI()
           .listMinisterioThatMembroParticipate(ref.read(userProvider).id);
-      print(ministeriosResponse);
       setState(() {
         _ministerios = ministeriosResponse;
       });
@@ -151,6 +149,7 @@ class _CardMinisterioMembroState extends ConsumerState<CardMinisterioMembro> {
       });
     } catch (e) {
       log(e.toString(), name: "MinisterioMainScreen");
+      if (!mounted) return;
       setState(() {
         loading = false;
       });
@@ -380,7 +379,7 @@ class _CardsMinisterioComunidadeState
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: SizedBox(
-        height: 430,
+        height: 460,
         child: PageView.builder(
             controller: _pageController,
             itemCount: _ministerios.length,

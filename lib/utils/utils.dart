@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
@@ -6,6 +7,16 @@ import 'package:flutter/material.dart';
 class AppUtils {
   Uint8List getImageByBase64(String image64) {
     return base64Decode(image64.split(',').last);
+  }
+
+  Color getRandomColor() {
+    final Random random = Random();
+    return Color.fromARGB(
+      255, // Alpha (opacidade) fixo em 255 para cor completamente opaca
+      random.nextInt(256), // Red
+      random.nextInt(256), // Green
+      random.nextInt(256), // Blue
+    );
   }
 
   static Future<dynamic> modalDelete(
